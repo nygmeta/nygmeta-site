@@ -6,7 +6,7 @@ OUT = os.path.join(ROOT, "docs")
 os.makedirs(OUT, exist_ok=True)
 
 NAV = [("index.html", "Home"), ("lab-automation.html", "Lab Automation"),
-       ("humanoids.html", "Humanoids"), ("nur-lighting.html", "Nur Lighting"),
+       ("openlabai.html", "OpenLabAI"), ("humanoids.html", "Humanoids"), ("nur-lighting.html", "Nur Lighting"),
        ("robotics.html", "Robotics"), ("spiderharp.html", "SpiderHarp"),
        ("art.html", "Art"), ("about.html", "About")]
 
@@ -32,6 +32,16 @@ h1{font-size:clamp(30px,5vw,44px);line-height:1.15;margin:0 0 12px}h2{font-size:
 .cols{columns:3 200px;font-size:15px;color:var(--muted)}.cols li{break-inside:avoid}
 blockquote{border-left:3px solid var(--accent);margin:32px 0;padding:4px 18px;font-size:20px}
 .video{position:relative;padding-top:56.25%;margin:24px 0}.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:10px}
+.steps{list-style:none;counter-reset:s;padding:0;margin:24px 0}
+.steps li{counter-increment:s;position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px 14px 58px;margin:0 0 10px}
+.steps li::before{content:counter(s);position:absolute;left:16px;top:14px;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--bg);font-weight:700;font-size:15px;display:grid;place-items:center}
+.steps b{display:block}.steps span{color:var(--muted);font-size:16px}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:24px 0;font-size:15px}
+.flow div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.flow div.gate{border-color:var(--accent);color:var(--accent);font-weight:600}.flow i{color:var(--muted);font-style:normal}
+.tablewrap{overflow-x:auto;margin:20px 0}table{border-collapse:collapse;width:100%;font-size:16px}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:600;font-size:14px}
+code{background:var(--card);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:.88em}
 footer{border-top:1px solid var(--line);color:var(--muted);font-size:14px;text-align:center;padding:24px 16px}
 @media (max-width:640px){.bar{gap:6px}nav{gap:2px 14px}}
 """
@@ -118,6 +128,51 @@ page("lab-automation.html", "Lab Automation", f"""
 {gallery(lab[9:])}
 <h2>Methods I Developed</h2>
 <ul class="cols">{mlist}</ul>
+""")
+
+# ---------- OpenLabAI ----------
+layers = [
+ ("Structured tools, never raw hardware",
+  "The agent can only call a fixed set of tools, such as <code>read_deck</code>, <code>create_protocol</code>, <code>upload_protocol</code> and <code>start_run</code>. It has no other way to reach an instrument."),
+ ("The request is validated before a file is written",
+  "Protocol names, well references, step types, volumes, mix cycles and deck slots are each checked. Volumes are compared with the pipette's capacity. If anything is off, nothing is written."),
+ ("The protocol is checked before anything moves",
+  "On the Opentrons OT-2, uploading sends the protocol to the robot for its own analysis and creates a run that sits idle. A second check compares the analysed commands with deck limits. With PyLabRobot, the plan is first simulated with tip and volume tracking, which catches aspirating liquid that is not there or reusing a tip."),
+ ("A person approves every motion",
+  "Any tool that moves the robot refuses unless it is called with <code>confirm=true</code>, which stands for a named person approving that specific run. Pause and stop are never gated, because they only make the robot safer. In Slack, the approver's identity is recorded and a lab can require a second person."),
+ ("Checks fail closed",
+  "If the robot's analysis timed out, produced no commands, or the constraint checks could not load, the answer is \"do not start\". A check that could not run never counts as a check that passed."),
+ ("The approval is tied to the exact protocol",
+  "The PyLabRobot connector's approval token is a hash of the plan and of the commands it generates, so what was approved is what runs. The OT-2 path records the SHA-256 of the uploaded file."),
+ ("Every action is written to an audit log",
+  "Home, start, pause, resume and stop are logged with the operator and the protocol hash, so a result can be traced back to exactly what ran and who approved it."),
+ ("Monitoring and recovery go through a person",
+  "<code>get_run_status</code> reports the robot's errors and the safe next actions for the run's state. After a failure it sends someone to look at the deck. It never retries on its own."),
+]
+status = [
+ ("Opentrons OT-2", "Opentrons HTTP API", "Plan, validate, upload, robot analysis, approve, run, monitor", "Partly verified on a physical OT-2; execution path tested against a simulated robot"),
+ ("Hamilton STAR / STARlet", "PyLabRobot", "Generate a protocol and simulate it", "Simulation only; not yet run on a physical Hamilton"),
+ ("Beckman Biomek", "COM automation", "Read the deck and generate a method file for review", "Not verified on hardware"),
+ ("HighRes Cellario", "Cellario API", "Schedule runs and read device and queue status", "Not verified on hardware"),
+]
+page("openlabai.html", "OpenLabAI", f"""
+<h1>OpenLabAI: how the guardrails work</h1>
+<p class="lede">An open-source framework that lets an AI agent plan an experiment and run it on lab robots, without ever letting the agent move hardware on its own.</p>
+{ps("Scientists often wait on an automation engineer for every protocol change, or have to learn each vendor's software. I was that engineer for years. OpenLabAI lets a scientist describe an experiment in plain language; an agent turns it into a protocol, and a set of guardrails decides whether and when the robot moves.",
+    "The design rule is simple: the agent can plan anything, but it can only act through tools that validate the request, check it against the robot, wait for a person to approve, and record what ran.")}
+<div class="flow"><div>Scientist's request</div><i>→</i><div>Agent plans</div><i>→</i><div>Validate</div><i>→</i><div>Robot analysis or simulation</div><i>→</i><div class="gate">Human approval</div><i>→</i><div>Robot runs</div><i>→</i><div>Audit log</div></div>
+<h2>The eight layers</h2>
+<ol class="steps">{"".join(f"<li><b>{t}</b><span>{d}</span></li>" for t, d in layers)}</ol>
+<h2>What works on which instrument</h2>
+{ps("I would rather be exact about this than impressive. The table says what each connector does today and how far it has been verified.")}
+<div class="tablewrap"><table><tr><th>Instrument</th><th>Connection</th><th>What the agent can do</th><th>Verification</th></tr>
+{"".join(f"<tr><td><b>{a}</b></td><td>{b}</td><td>{c}</td><td>{d}</td></tr>" for a, b, c, d in status)}</table></div>
+<h2>What the guardrails do not do</h2>
+<ul><li><b>They do not know the biology.</b> They check volumes, tips and deck layout. Whether a run is scientifically right is still decided by the scientist's acceptance criteria.</li>
+<li><b>The approval flag is passed by the agent.</b> The next step is approval the server verifies from outside the agent, such as the Slack button, so the agent cannot approve its own run.</li>
+<li><b>Some layers are in review.</b> Fail-closed checks, request validation and the gates on homing and resuming are in an open pull request, not yet merged.</li></ul>
+<h2>Code</h2>
+{ps('OpenLabAI is MIT-licensed and tested in CI on every change: <a href="https://github.com/nygmeta/OpenLabAI">github.com/nygmeta/OpenLabAI</a>. The guardrail changes described above are in <a href="https://github.com/nygmeta/OpenLabAI/pull/3">pull request 3</a>.')}
 """)
 
 # ---------- Humanoids ----------
