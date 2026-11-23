@@ -4,7 +4,7 @@
 <meta name="description" content="Ainur Nygmet: mechanical engineer and robotics founder building intelligent physical systems.">
 <link rel="stylesheet" href="style.css"></head><body>
 <header><div class="bar"><a class="brand" href="index.html">AINUR NYGMET</a><nav><a href="index.html">Home</a><a href="lab-automation.html">Lab Automation</a><a href="openlabai.html" class=on>OpenLabAI</a><a href="humanoids.html">Humanoids</a><a href="nur-lighting.html">Nur Lighting</a><a href="robotics.html">Robotics</a><a href="spiderharp.html">SpiderHarp</a><a href="art.html">Art</a><a href="about.html">About</a></nav></div></header>
-<main>
+<main class="">
 <h1>OpenLabAI: how the guardrails work</h1>
 <p class="lede">An open-source framework that lets an AI agent plan an experiment and run it on lab robots, without ever letting the agent move hardware on its own.</p>
 <p>Scientists often wait on an automation engineer for every protocol change, or have to learn each vendor's software. I was that engineer for years. OpenLabAI lets a scientist describe an experiment in plain language; an agent turns it into a protocol, and a set of guardrails decides whether and when the robot moves.</p><p>The design rule is simple: the agent can plan anything, but it can only act through tools that validate the request, check it against the robot, wait for a person to approve, and record what ran.</p>

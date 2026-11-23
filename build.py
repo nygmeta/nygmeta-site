@@ -42,11 +42,22 @@ blockquote{border-left:3px solid var(--accent);margin:32px 0;padding:4px 18px;fo
 .tablewrap{overflow-x:auto;margin:20px 0}table{border-collapse:collapse;width:100%;font-size:16px}
 th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:600;font-size:14px}
 code{background:var(--card);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:.88em}
+.sq{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;font-size:16px;line-height:1.75}
+.sq h1{text-transform:uppercase;text-align:center;font-family:Inter,system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;font-weight:800;letter-spacing:.03em;font-size:clamp(28px,5.2vw,50px);margin:24px 0 36px}
+.sq h2{font-size:18px;font-weight:700;margin:40px 0 14px}
+.sq p{margin:0 0 20px}.sq img{border-radius:0;margin:0 0 28px;width:100%}
+.sq .big{font-size:clamp(18px,2.6vw,24px);line-height:1.5;margin:36px 0 20px}
+.sq .cap{font-size:14px;color:var(--muted);margin:0 0 10px}
+.sq .split{display:grid;grid-template-columns:2.4fr 1fr;gap:16px;align-items:start;margin:0 0 28px}.sq .split img{margin:0 0 16px}
+.sq .pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 28px}.sq .pair img{margin:0}
+.sq .side{display:grid;grid-template-columns:1fr 200px;gap:20px;align-items:center;margin:0 0 28px}.sq .side img{margin:0}
+.sq .cols{font-family:Inter,system-ui,sans-serif}
+@media (max-width:640px){.sq .split,.sq .pair,.sq .side{grid-template-columns:1fr}.sq .side img{max-width:200px}}
 footer{border-top:1px solid var(--line);color:var(--muted);font-size:14px;text-align:center;padding:24px 16px}
 @media (max-width:640px){.bar{gap:6px}nav{gap:2px 14px}}
 """
 
-def page(fname, title, body):
+def page(fname, title, body, cls=""):
     nav = "".join(f'<a href="{h}"{" class=on" if h == fname else ""}>{t}</a>' for h, t in NAV)
     doc = f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -54,7 +65,7 @@ def page(fname, title, body):
 <meta name="description" content="Ainur Nygmet: mechanical engineer and robotics founder building intelligent physical systems.">
 <link rel="stylesheet" href="style.css"></head><body>
 <header><div class="bar"><a class="brand" href="index.html">AINUR NYGMET</a><nav>{nav}</nav></div></header>
-<main>{body}</main>
+<main class="{cls}">{body}</main>
 <footer>© Ainur Nygmet · <a href="https://www.linkedin.com/in/nygmetainur">LinkedIn</a> · <a href="https://github.com/nygmeta/OpenLabAI">OpenLabAI on GitHub</a></footer>
 </body></html>"""
     with open(os.path.join(OUT, fname), "w") as f:
@@ -111,24 +122,40 @@ methods = {
  "Yeast": ["Amplicon Hitpicking", "Backbone Digestion", "Backbone Heat Shock", "Backbone Normalization and Aliquot", "Bead Extraction", "Transformation"],
 }
 mlist = "".join(f"<li><b>{html.escape(k)}</b>: {html.escape(', '.join(v))}</li>" for k, v in methods.items())
+def L(n, alt=""):
+    return f'<img src="{lab[n - 1]}" alt="{html.escape(alt)}" loading="lazy">'
+
 page("lab-automation.html", "Lab Automation", f"""
-<h1>Lab Automation at Hexagon Bio</h1>
-<p class="lede">Scientist-centric design: more than 50 custom Hamilton methods and 200+ deck layouts for drug discovery.</p>
-<img src="{lab[0]}" alt="">
-<h2>Scientist-Centric Design</h2>
-{ps("In my role as a Lab Automation Engineer, I developed over 50 custom methods and edited more than 200 deck images. These methods were crafted with a singular goal in mind: to create solutions centered around scientists' needs and workflows. Each deck image, the first thing a scientist sees when they power on the robot, serves as a visual guide showing where to place reagents and which labware to use. Every deck image was paired with the Hamilton methods I developed in close collaboration with the scientists themselves.",
-    "Through interviews and observations, I tailored each method to align with their physical setups, operational habits, and workflows. Beyond functionality, safety was paramount: I arranged reagents and plates to minimize risks, so accidents like finger injuries in the lab were virtually eliminated.")}
-{gallery(lab[1:9])}
-<h2>Safety and Training</h2>
-{ps("I prioritized safety around lab automation equipment so that all users could operate the systems confidently and without risk. I trained over 40 scientists and research associates to use Hamilton robotics systems safely, emphasizing proper handling techniques and safety protocols, including step-by-step guidance running the methods I developed for them. I also replaced HEPA filters on the Hamilton equipment to maintain a sterile environment when working with BSL-2 microbes, protecting both the experiments and the scientists.")}
-<h2>Workcells, XY Filler and Mantis</h2>
-{ps("At Hexagon, as at other companies I worked for, we ran a workcell: robotic hardware integrated with automation systems to streamline repetitive tasks, improve precision, and keep workflows safe. Most workcells, even at companies like Ginkgo Bioworks, use HighRes Biosolutions hardware with Cellario software, which I am certified to operate.",
-    "To verify that the XY filler dispensed the correct volume, I tested it on more than 1,000 bottles with different types of media. I then taught the next step on a Hamilton robot, developed a method to move media from bottles into plates, and ran it with real samples. I also worked with the Mantis, a micro-dispenser well suited to mRNA vaccine workflows.",
-    "I have given workshops on lab automation at BioPunk Society in San Francisco and at the SilkRoad Innovation Hub in Palo Alto during TechCrunch week. I enjoy teaching people how to use robots.")}
-{gallery(lab[9:])}
+<h1>Scientist-Centric Design</h1>
+{ps("In my role as a Lab Automation Engineer at Hexagon Bio, I developed over 50 custom methods and edited more than 200 deck images (eight examples are below). These methods were crafted with a singular goal in mind: to create solutions centered around scientists' needs and workflows. Each deck image, the first thing a scientist sees when they power on the robot, serves as a visual guide, showing where to place reagents and which labware to use. Every deck image, unique and meticulously designed, was paired with the Hamilton methods I developed in close collaboration with the scientists themselves.",
+    "Through interviews and observations, I tailored each method to align seamlessly with their physical setups, operational habits, and workflows. Beyond functionality, safety was paramount: I thoughtfully arranged reagents and plates to minimize risks, ensuring that accidents like finger injuries in the lab were virtually eliminated. This scientist-centered approach wove together usability, efficiency, and safety, reflecting my dedication to thoughtful design.")}
+<h2>Method Development Process</h2>
+{L(2, "Method development process: scientist request, method development, teaching, testing, release")}
+<p class="big">8 examples of decks I have developed (which are set on a Hamilton robot) and a small description of methods:</p>
+{L(3, "Deck layouts: Chemical Genetics growth plate hitpicking, bead dispense, volume verification, NGS pooling")}
+{L(4, "Deck layouts: WGS qPCR setup and dilution, PlasMORE dilution plating, Chemical Genetics PCR setup")}
+{L(5, "Hamilton STARlet and STAR liquid handlers with dimensions")}
+{ps("As part of my role, I prioritized safety around lab automation equipment, ensuring that all users could operate the systems confidently and without risk. I trained over 40 scientists and research associates on how to safely use Hamilton robotics systems, emphasizing proper handling techniques and safety protocols. This included step-by-step guidance running methods which I developed for them. Additionally, I replaced HEPA filters on the Hamilton equipment to maintain a sterile environment, particularly when working with BSL-2 microbes. This not only preserved the integrity of the experiments but also protected scientists from potential toxic exposure. My focus on creating a safe and efficient working environment helped foster trust and reliability in the lab's automated workflows.")}
+{L(6, "Current state of the laboratory: method runs per machine over 30 days and the liquid handlers with their users")}
+{L(7, "Personal contributions: 250 of the lab's method runs in 30 days were methods I developed")}
+{L(8, "XY filler programmed for the NPC and STE teams, with custom caps")}
+{L(9, "XY filler challenges and findings: over-dispensing by 3.5 percent, solved with gravimetric measurement")}
+<p class="cap">Picture of XY filler: testing different media dispense</p>
+<div class="split">{L(14, "XY filler in a fume hood dispensing media into bottles")}<div>{L(1, "Bottles of media in racks")}{L(17, "Bottles of media in racks, side view")}</div></div>
+{L(18, "Racks of filled bottles on the lab bench")}
+{ps("To verify that the XY filler was dispensing the correct amount of liquid, I tested it on over 1,000 bottles with different types of media.",
+    "After dispensing from the XY filler, the next step was to get the media out and dispense it into plates. Below you can see how I taught it on the robot, developed a method for it on the Hamilton, and then ran it with real samples.")}
+{L(15, "3D deck view of the Hamilton method that moves media from bottles into plates")}
+{ps("At Hexagon, as well as other companies I worked for, we had a workcell. What is a workcell, you may ask? It is typically a robotic piece of hardware integrated with automation systems, designed to streamline repetitive tasks, enhance precision, and ensure safety in laboratory or industrial workflows. Most workcells, even in leading companies like Ginkgo Bioworks, often use HighRes Biosolutions hardware, with Cellario being the software of choice to operate and manage these systems efficiently. I hold the certification to operate it, which usually costs $7.5k.")}
+{L(19, "Machines on the workcell: two Hamilton STARlets, two HiG centrifuges, plate sealer and peeler, Unchained Lunatic, capper and decapper, twenty Inheco incubator shakers; Cellario scheduling software")}
+<div class="side"><p>Another robot I worked with, called Mantis, is used mostly for micro dispensing, great for mRNA vaccine delivery.</p>{L(11, "Cartoon mantis saying: I'm a Mantis!")}</div>
+{ps("I gave a workshop about lab automation at BioPunk Society in San Francisco and at the SilkRoad Innovation Hub in Palo Alto during TechCrunch week. I enjoy teaching people how to use robots and running interactive workshops.")}
+<div class="pair">{L(10, "Presenting AI can improve lab automation and biotech on stage")}{L(13, "Workshop audience at the SilkRoad Innovation Hub")}</div>
+<div class="pair">{L(12, "Workshop attendees gathered around a demo at BioPunk Society")}{L(16, "Liquid handling demo setup at BioPunk Society")}</div>
+<div class="side"><p>Thank you for reading. The full list of methods I developed at Hexagon Bio is below.</p>{L(20, "Ainur working at a lab automation workstation")}</div>
 <h2>Methods I Developed</h2>
 <ul class="cols">{mlist}</ul>
-""")
+""", cls="sq")
 
 # ---------- OpenLabAI ----------
 layers = [

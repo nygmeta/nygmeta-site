@@ -30,5 +30,16 @@ blockquote{border-left:3px solid var(--accent);margin:32px 0;padding:4px 18px;fo
 .tablewrap{overflow-x:auto;margin:20px 0}table{border-collapse:collapse;width:100%;font-size:16px}
 th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:600;font-size:14px}
 code{background:var(--card);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:.88em}
+.sq{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;font-size:16px;line-height:1.75}
+.sq h1{text-transform:uppercase;text-align:center;font-family:Inter,system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;font-weight:800;letter-spacing:.03em;font-size:clamp(28px,5.2vw,50px);margin:24px 0 36px}
+.sq h2{font-size:18px;font-weight:700;margin:40px 0 14px}
+.sq p{margin:0 0 20px}.sq img{border-radius:0;margin:0 0 28px;width:100%}
+.sq .big{font-size:clamp(18px,2.6vw,24px);line-height:1.5;margin:36px 0 20px}
+.sq .cap{font-size:14px;color:var(--muted);margin:0 0 10px}
+.sq .split{display:grid;grid-template-columns:2.4fr 1fr;gap:16px;align-items:start;margin:0 0 28px}.sq .split img{margin:0 0 16px}
+.sq .pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 28px}.sq .pair img{margin:0}
+.sq .side{display:grid;grid-template-columns:1fr 200px;gap:20px;align-items:center;margin:0 0 28px}.sq .side img{margin:0}
+.sq .cols{font-family:Inter,system-ui,sans-serif}
+@media (max-width:640px){.sq .split,.sq .pair,.sq .side{grid-template-columns:1fr}.sq .side img{max-width:200px}}
 footer{border-top:1px solid var(--line);color:var(--muted);font-size:14px;text-align:center;padding:24px 16px}
 @media (max-width:640px){.bar{gap:6px}nav{gap:2px 14px}}
